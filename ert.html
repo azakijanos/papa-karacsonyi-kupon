@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apa Karácsonyi Kuponjai 🎄</title>
+
+<style>
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: white;
+
+    /* SZÉP HÁTTÉR */
+    background:
+        radial-gradient(circle at top, rgba(255,255,255,0.15), transparent 40%),
+        repeating-linear-gradient(
+            45deg,
+            rgba(255,255,255,0.03),
+            rgba(255,255,255,0.03) 10px,
+            transparent 10px,
+            transparent 20px
+        ),
+        linear-gradient(180deg, #0b3d2e, #145c43);
+    min-height: 100vh;
+}
+
+h1 {
+    margin-top: 10px;
+}
+
+.intro {
+    max-width: 620px;
+    margin: 0 auto 30px;
+    font-size: 16px;
+    line-height: 1.6;
+    background: rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 14px;
+}
+
+.coupon {
+    background: white;
+    color: #0f5132;
+    border-radius: 18px;
+    padding: 18px;
+    margin: 16px auto;
+    max-width: 460px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.coupon.used {
+    opacity: 0.45;
+}
+
+.coupon h2 {
+    margin: 0 0 10px;
+}
+
+.count {
+    font-size: 15px;
+    margin-bottom: 14px;
+}
+
+button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:disabled {
+    background: gray;
+    cursor: default;
+}
+
+.reset {
+    display: block;
+    margin: 40px auto 10px;
+    background: #ffc107;
+    color: black;
+    font-weight: bold;
+}
+
+footer {
+    margin-top: 35px;
+    font-size: 14px;
+    opacity: 0.85;
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎄 Boldog Karácsonyt Apa! 🎄</h1>
+
+<div class="intro">
+Ez egy <b>digitális kuponfüzet</b>, ami emlékszik minden beváltásra 📱  
+<br>
+Ha bezárod vagy frissíted az oldalt, <b>nem nullázódik</b>.  
+<br><br>
+Minden „Beváltom” gomb <b>végleges döntés</b> 😄  
+<br><br>
+Szeretettel: a fiad ❤️
+</div>
+
+<div id="coupons"></div>
+
+<button class="reset" onclick="resetAll()">Összes kupon visszaállítása 🔄</button>
+
+<footer>
+⚠️ Csak végső esetben használd 😄
+</footer>
+
+<script>
+const coupons = [
+    { text: "🚗 Kocsi takarítás", max: 1 },
+    { text: "☕ Kávé főzés", max: 3 },
+    { text: "🛒 Kisboltba menés", max: 3 },
+    { text: "💻 Laptop takarítás", max: 3 },
+    { text: "🤫 CSÖND LEGYEN", max: 1 },
+    { text: "💪 Izom mutatás", max: 2 }
+];
+
+const STORAGE_KEY = "apa_karacsonyi_kupon_allapot";
+
+// HA VAN MENTÉS → AZT HASZNÁLJUK
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY));
+if (!state) {
+    state = coupons.map(c => c.max);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+const container = document.getElementById("coupons");
+
+function render() {
+    container.innerHTML = "";
+    coupons.forEach((c, i) => {
+        const remaining = state[i];
+        const usedUp = remaining === 0;
+
+        const div = document.createElement("div");
+        div.className = "coupon" + (usedUp ? " used" : "");
+
+        div.innerHTML = `
+            <h2>${c.text}</h2>
+            <div class="count">Hátralévő alkalmak: <b>${remaining} / ${c.max}</b></div>
+            <button ${usedUp ? "disabled" : ""} onclick="useCoupon(${i})">
+                ${usedUp ? "Elfogyott ✅" : "Beváltom"}
+            </button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function useCoupon(i) {
+    if (state[i] > 0) {
+        state[i]--;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        render();
+    }
+}
+
+function resetAll() {
+    if (confirm("Biztosan visszaállítod az ÖSSZES kupont?")) {
+        state = coupons.map(c => c.max);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        render();
+    }
+}
+
+render();
+</script>
+
+</body>
+</html>
